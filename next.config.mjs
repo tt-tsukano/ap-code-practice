@@ -6,6 +6,16 @@ const nextConfig = {
       ...config.experiments,
       asyncWebAssembly: true,
     };
+    
+    // Ignore pyodide during server-side build
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+      child_process: false,
+    };
+    
     return config;
   },
   headers: async () => [
