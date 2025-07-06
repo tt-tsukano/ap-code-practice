@@ -16,12 +16,17 @@ const DEFAULT_SCHEMA: SchemaDefinition = {
   createStatement: `CREATE TABLE students (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
-    score INTEGER
+    score INTEGER,
+    subject TEXT,
+    grade_level INTEGER
 );`,
   insertStatements: [
-    `INSERT INTO students VALUES (1, '田中太郎', 85);`,
-    `INSERT INTO students VALUES (2, '佐藤花子', 92);`,
-    `INSERT INTO students VALUES (3, '鈴木一郎', 78);`,
+    `INSERT INTO students VALUES (1, '田中太郎', 85, '数学', 3);`,
+    `INSERT INTO students VALUES (2, '佐藤花子', 92, '英語', 3);`,
+    `INSERT INTO students VALUES (3, '鈴木一郎', 78, '国語', 2);`,
+    `INSERT INTO students VALUES (4, '山田美咲', 96, '理科', 3);`,
+    `INSERT INTO students VALUES (5, '渡辺健太', 74, '社会', 2);`,
+    `INSERT INTO students VALUES (6, '高橋由美', 88, '数学', 3);`,
   ],
 };
 
