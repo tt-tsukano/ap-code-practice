@@ -1,5 +1,6 @@
 import { initializeSqlJs } from './sql-loader';
 import { Database, QueryExecResult } from 'sql.js';
+import { errorMonitor, capturePerformance } from './error-monitoring';
 
 export interface QueryResult {
   success: boolean;
@@ -29,9 +30,23 @@ export class QueryExecutor {
       return;
     }
 
+    const startTime = performance.now();
     try {
       this.database = await initializeSqlJs();
+      
+      // Capture performance metrics
+      const initTime = performance.now() - startTime;
+      capturePerformance({
+        initTime,
+        executionTime: 0,
+        timestamp: Date.now(),
+      });
+      
     } catch (error) {
+      errorMonitor.captureSqlError(
+        error instanceof Error ? error : new Error('Unknown initialization error'),
+        { phase: 'initialization' }
+      );
       throw new Error(`Failed to initialize SQL.js: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -63,16 +78,35 @@ export class QueryExecutor {
   private async executeWithTimeout(sql: string, context: QueryExecutionContext): Promise<QueryResult> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
+        errorMonitor.captureExecutionTimeout('sql', this.executionTimeout);
         reject(new Error('Query execution timed out (10 seconds)'));
       }, this.executionTimeout);
 
       this.executeQueryInternal(sql, context)
         .then((result) => {
           clearTimeout(timeoutId);
+          
+          // Capture performance metrics
+          capturePerformance({
+            initTime: 0,
+            executionTime: result.executionTime,
+            timestamp: Date.now(),
+          });
+          
           resolve(result);
         })
         .catch((error) => {
           clearTimeout(timeoutId);
+          
+          errorMonitor.captureSqlError(
+            error instanceof Error ? error : new Error('Unknown execution error'),
+            { 
+              phase: 'execution',
+              sqlLength: sql.length,
+              executionTime: Date.now() - context.startTime 
+            }
+          );
+          
           reject(error);
         });
     });

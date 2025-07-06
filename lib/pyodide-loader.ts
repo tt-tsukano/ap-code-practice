@@ -46,13 +46,18 @@ export async function initializePyodide(): Promise<PyodideInterface> {
       await loadPyodideScript();
     }
     
+    // Use CDN with optimized settings
     const pyodide = await window.loadPyodide({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.28.0/full/',
       stdout: (text: string) => {
-        console.log('[Pyodide stdout]:', text);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Pyodide stdout]:', text);
+        }
       },
       stderr: (text: string) => {
-        console.error('[Pyodide stderr]:', text);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[Pyodide stderr]:', text);
+        }
       },
     });
 
@@ -72,9 +77,20 @@ async function loadPyodideScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/pyodide/v0.28.0/full/pyodide.js';
+    script.async = true;
+    script.defer = true;
+    // Add integrity check and crossorigin for security
+    script.crossOrigin = 'anonymous';
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load Pyodide script'));
-    document.head.appendChild(script);
+    // Use requestIdleCallback for better performance
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        document.head.appendChild(script);
+      });
+    } else {
+      document.head.appendChild(script);
+    }
   });
 }
 

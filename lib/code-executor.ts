@@ -1,4 +1,5 @@
 import { initializePyodide } from './pyodide-loader';
+import { errorMonitor, capturePerformance } from './error-monitoring';
 
 export interface ExecutionResult {
   success: boolean;
@@ -28,9 +29,23 @@ export class CodeExecutor {
       return;
     }
 
+    const startTime = performance.now();
     try {
       this.pyodide = await initializePyodide() as PyodideInterface;
+      
+      // Capture performance metrics
+      const initTime = performance.now() - startTime;
+      capturePerformance({
+        initTime,
+        executionTime: 0,
+        timestamp: Date.now(),
+      });
+      
     } catch (error) {
+      errorMonitor.capturePyodideError(
+        error instanceof Error ? error : new Error('Unknown initialization error'),
+        { phase: 'initialization' }
+      );
       throw new Error(`Failed to initialize Pyodide: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -62,16 +77,35 @@ export class CodeExecutor {
   private async executeWithTimeout(code: string, context: ExecutionContext): Promise<ExecutionResult> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
+        errorMonitor.captureExecutionTimeout('pyodide', this.executionTimeout);
         reject(new Error('Code execution timed out (30 seconds)'));
       }, this.executionTimeout);
 
       this.executeCodeInternal(code, context)
         .then((result) => {
           clearTimeout(timeoutId);
+          
+          // Capture performance metrics
+          capturePerformance({
+            initTime: 0,
+            executionTime: result.executionTime,
+            timestamp: Date.now(),
+          });
+          
           resolve(result);
         })
         .catch((error) => {
           clearTimeout(timeoutId);
+          
+          errorMonitor.capturePyodideError(
+            error instanceof Error ? error : new Error('Unknown execution error'),
+            { 
+              phase: 'execution',
+              codeLength: code.length,
+              executionTime: Date.now() - context.startTime 
+            }
+          );
+          
           reject(error);
         });
     });

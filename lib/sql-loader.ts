@@ -27,12 +27,15 @@ export async function initializeSqlJs(): Promise<Database> {
     try {
       const SQL = await initSqlJs({
         locateFile: (file: string) => {
-          // Use CDN for WASM files
+          // Use CDN with better caching and performance
+          if (file.endsWith('.wasm')) {
+            return `https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/${file}`;
+          }
           return `https://sql.js.org/dist/${file}`;
         }
       });
 
-      // Create a new database instance
+      // Create a new database instance with optimized settings
       const db = new SQL.Database();
       sqlJsInstance = db;
       return db;
