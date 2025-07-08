@@ -7,10 +7,6 @@ import {
   Problem, 
   AlgorithmProblem, 
   DatabaseProblem, 
-  BlankItem, 
-  TestCase, 
-  QueryProblem,
-  SchemaDefinition,
   UserAnswer,
   LearningProgress,
   validateProblemData,
@@ -73,7 +69,7 @@ export interface AnswerStatistics {
  * @param problem 検証対象の問題データ
  * @returns 詳細な検証結果
  */
-export function validateProblemDataDetailed(problem: any): {
+export function validateProblemDataDetailed(problem: unknown): {
   isValid: boolean;
   errors: string[];
   warnings: string[];
@@ -137,7 +133,7 @@ export function validateProblemDataDetailed(problem: any): {
 /**
  * アルゴリズム問題の特別検証
  */
-function validateAlgorithmProblemSpecific(problem: AlgorithmProblem, result: { errors: string[], warnings: string[] }): void {
+function validateAlgorithmProblemSpecific(problem: AlgorithmProblem, result: { errors: string[]; warnings: string[] }): void {
   // 擬似コードの存在確認
   if (!problem.pseudoCode || problem.pseudoCode.trim().length === 0) {
     result.errors.push('Pseudo code is required for algorithm problems');
@@ -172,7 +168,7 @@ function validateAlgorithmProblemSpecific(problem: AlgorithmProblem, result: { e
 /**
  * データベース問題の特別検証
  */
-function validateDatabaseProblemSpecific(problem: DatabaseProblem, result: { errors: string[], warnings: string[] }): void {
+function validateDatabaseProblemSpecific(problem: DatabaseProblem, result: { errors: string[]; warnings: string[] }): void {
   // スキーマの存在確認
   if (problem.schema.length === 0) {
     result.errors.push('Database problems must have at least one schema table');
@@ -184,7 +180,7 @@ function validateDatabaseProblemSpecific(problem: DatabaseProblem, result: { err
   }
 
   // スキーマの妥当性
-  problem.schema.forEach((table, index) => {
+  problem.schema.forEach((table) => {
     if (table.columns.length === 0) {
       result.errors.push(`Table ${table.tableName} has no columns`);
     }
@@ -197,7 +193,7 @@ function validateDatabaseProblemSpecific(problem: DatabaseProblem, result: { err
   });
 
   // クエリの妥当性
-  problem.queries.forEach((query, index) => {
+  problem.queries.forEach((query) => {
     if (query.blanks.length === 0) {
       result.errors.push(`Query ${query.id} has no blanks`);
     }
@@ -273,7 +269,7 @@ export function analyzeProblem(problem: Problem): ProblemAnalysis {
  */
 function analyzeComplexity(problem: Problem): ProblemAnalysis['complexity'] {
   let blanksComplexity: 'simple' | 'moderate' | 'complex' = 'simple';
-  let contentComplexity = problem.difficulty as 'basic' | 'intermediate' | 'advanced';
+  const contentComplexity = problem.difficulty as 'basic' | 'intermediate' | 'advanced';
   let estimatedSolvingTime = problem.estimatedTime;
 
   if (isAlgorithmProblem(problem)) {
