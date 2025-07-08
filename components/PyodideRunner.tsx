@@ -12,20 +12,34 @@ interface PyodideRunnerProps {
   className?: string;
 }
 
-const DEFAULT_PYTHON_CODE = `# Python実行デモ
+const DEFAULT_PYTHON_CODE = `# Python実行デモ - フィボナッチ数列と基本計算
 def fibonacci(n):
+    """フィボナッチ数列を計算する関数"""
     if n <= 1:
         return n
     return fibonacci(n-1) + fibonacci(n-2)
 
 # フィボナッチ数列を計算
+print("=== フィボナッチ数列 ===")
 for i in range(10):
     print(f"fibonacci({i}) = {fibonacci(i)}")
 
-# 基本的な計算
-numbers = [1, 2, 3, 4, 5]
+# 基本的な統計計算
+print("\\n=== 基本統計 ===")
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+print(f"データ: {numbers}")
 print(f"合計: {sum(numbers)}")
-print(f"平均: {sum(numbers) / len(numbers)}")
+print(f"平均: {sum(numbers) / len(numbers):.2f}")
+print(f"最大値: {max(numbers)}")
+print(f"最小値: {min(numbers)}")
+
+# リスト内包表記のデモ
+print("\\n=== リスト内包表記 ===")
+squares = [x**2 for x in range(1, 6)]
+print(f"1-5の二乗: {squares}")
+
+even_numbers = [x for x in range(20) if x % 2 == 0]
+print(f"0-19の偶数: {even_numbers}")
 `;
 
 export function PyodideRunner({
