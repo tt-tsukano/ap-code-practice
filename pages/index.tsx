@@ -72,17 +72,24 @@ export default function Home() {
       });
     };
 
-    // Performance measurement simulation
-    const measurePerformance = async () => {
-      setPerformanceMetrics({
-        pyodideLoadTime: Math.floor(Math.random() * 3000) + 2000, // 2-5 seconds
-        sqlJsLoadTime: Math.floor(Math.random() * 800) + 200, // 0.2-1 seconds
-        isLoading: false,
-      });
-    };
+    // Performance measurement simulation (disabled to prevent hydration errors)
+    // const measurePerformance = async () => {
+    //   setPerformanceMetrics({
+    //     pyodideLoadTime: Math.floor(Math.random() * 3000) + 2000, // 2-5 seconds
+    //     sqlJsLoadTime: Math.floor(Math.random() * 800) + 200, // 0.2-1 seconds
+    //     isLoading: false,
+    //   });
+    // };
 
     checkBrowserSupport();
-    measurePerformance();
+    // measurePerformance();
+    
+    // Set default performance metrics to avoid hydration errors
+    setPerformanceMetrics({
+      pyodideLoadTime: 3500, // Fixed values to prevent hydration mismatch
+      sqlJsLoadTime: 600,
+      isLoading: false,
+    });
   }, []);
 
   return (

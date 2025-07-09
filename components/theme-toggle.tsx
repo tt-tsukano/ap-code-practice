@@ -13,7 +13,7 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return <Button variant="outline" size="sm">Loading...</Button>;
+    return null;
   }
 
   return (
