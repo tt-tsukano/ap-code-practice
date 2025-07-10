@@ -63,6 +63,7 @@ export function Layout({ children }: LayoutProps) {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="md:hidden p-2 rounded-md hover:bg-muted"
+                suppressHydrationWarning
               >
                 {isMobileMenuOpen ? (
                   <X className="h-5 w-5" />

@@ -21,6 +21,7 @@ export function ThemeToggle() {
       variant="outline"
       size="sm"
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      suppressHydrationWarning
     >
       {theme === 'light' ? '🌙' : '☀️'}
     </Button>
