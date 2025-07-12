@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // Temporarily disable to prevent hydration issues
   compress: true,
   swcMinify: true,
   
@@ -82,19 +82,20 @@ const nextConfig = {
   
   // CDN and caching headers
   headers: async () => [
-    {
-      source: '/(.*)',
-      headers: [
-        {
-          key: 'Cross-Origin-Embedder-Policy',
-          value: 'require-corp',
-        },
-        {
-          key: 'Cross-Origin-Opener-Policy',
-          value: 'same-origin',
-        },
-      ],
-    },
+    // Temporarily disable CORS headers that may cause issues in development
+    // {
+    //   source: '/(.*)',
+    //   headers: [
+    //     {
+    //       key: 'Cross-Origin-Embedder-Policy',
+    //       value: 'require-corp',
+    //     },
+    //     {
+    //       key: 'Cross-Origin-Opener-Policy',
+    //       value: 'same-origin',
+    //     },
+    //   ],
+    // },
     {
       source: '/fonts/(.*)',
       headers: [
