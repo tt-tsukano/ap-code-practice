@@ -5,16 +5,7 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
     <Button
@@ -23,7 +14,9 @@ export function ThemeToggle() {
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       suppressHydrationWarning
     >
-      {theme === 'light' ? '🌙' : '☀️'}
+      <span suppressHydrationWarning>
+        {resolvedTheme === 'dark' ? '☀️' : '🌙'}
+      </span>
     </Button>
   );
 }

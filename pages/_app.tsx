@@ -5,12 +5,7 @@ import { Layout } from "@/components/layout";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <ThemeProvider>
       <Layout>
         <Component {...pageProps} />
       </Layout>

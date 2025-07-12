@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ThemeToggle } from './theme-toggle';
@@ -18,11 +18,6 @@ const navigationItems = [
 export function Layout({ children }: LayoutProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -79,8 +74,8 @@ export function Layout({ children }: LayoutProps) {
           </div>
 
           {/* Mobile Navigation */}
-          {isMounted && isMobileMenuOpen && (
-            <nav className="md:hidden mt-4 pb-4 border-t pt-4">
+          {isMobileMenuOpen && (
+            <nav className="md:hidden mt-4 pb-4 border-t pt-4" suppressHydrationWarning>
               <div className="space-y-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
