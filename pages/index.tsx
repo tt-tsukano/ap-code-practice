@@ -14,6 +14,7 @@ interface BrowserSupport {
 }
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
   const [browserInfo, setBrowserInfo] = useState<BrowserSupport | null>(null);
   const [performanceMetrics, setPerformanceMetrics] = useState({
     pyodideLoadTime: 0,
@@ -22,6 +23,8 @@ export default function Home() {
   });
 
   useEffect(() => {
+    setIsMounted(true);
+    
     // Browser compatibility check
     const checkBrowserSupport = () => {
       const userAgent = navigator.userAgent;
@@ -105,7 +108,7 @@ export default function Home() {
           </p>
           
           {/* Browser Compatibility Status */}
-          {browserInfo && (
+          {isMounted && browserInfo && (
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 ${
               browserInfo.supported 
                 ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
@@ -134,7 +137,7 @@ export default function Home() {
               >
                 Python デモを見る
               </Link>
-              {!performanceMetrics.isLoading && (
+              {isMounted && !performanceMetrics.isLoading && (
                 <span className="text-xs text-muted-foreground">
                   予想読み込み時間: {(performanceMetrics.pyodideLoadTime / 1000).toFixed(1)}秒
                 </span>
@@ -157,7 +160,7 @@ export default function Home() {
               >
                 SQL デモを見る
               </Link>
-              {!performanceMetrics.isLoading && (
+              {isMounted && !performanceMetrics.isLoading && (
                 <span className="text-xs text-muted-foreground">
                   予想読み込み時間: {(performanceMetrics.sqlJsLoadTime / 1000).toFixed(1)}秒
                 </span>
@@ -220,7 +223,7 @@ export default function Home() {
               <Smartphone className="h-5 w-5 text-green-500" />
               <h3 className="text-lg font-semibold">ブラウザ対応状況</h3>
             </div>
-            {browserInfo && (
+            {isMounted && browserInfo ? (
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
                   <span>WebAssembly:</span>
@@ -263,6 +266,13 @@ export default function Home() {
                       {browserInfo.supported ? '完全対応' : '要アップデート'}
                     </span>
                   </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span>ブラウザ情報を取得中...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
                 </div>
               </div>
             )}
