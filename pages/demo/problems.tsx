@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { GetStaticProps } from 'next';
 import { 
   Problem, 
   isAlgorithmProblem,
   isDatabaseProblem 
 } from '@/types/problem';
 import { 
-  ProblemLoader, 
-  ProblemLoaderError 
+  ProblemLoader
 } from '@/lib/problem-loader';
 import { 
   generateProblemSummary, 
@@ -34,11 +34,6 @@ import {
   BarChart3
 } from 'lucide-react';
 
-interface LoadingState {
-  isLoading: boolean;
-  error: string | null;
-}
-
 interface ProblemData {
   problem: Problem;
   summary: ProblemSummary;
@@ -46,62 +41,16 @@ interface ProblemData {
   validation: ReturnType<typeof validateProblemDataDetailed>;
 }
 
-export default function ProblemsDemo() {
-  const [problems, setProblems] = useState<ProblemData[]>([]);
-  const [selectedProblem, setSelectedProblem] = useState<ProblemData | null>(null);
-  const [loadingState, setLoadingState] = useState<LoadingState>({
-    isLoading: true,
-    error: null
-  });
+interface ProblemsPageProps {
+  problems: ProblemData[];
+}
+
+export default function ProblemsDemo({ problems }: ProblemsPageProps) {
+  const [selectedProblem, setSelectedProblem] = useState<ProblemData | null>(
+    problems.length > 0 ? problems[0] : null
+  );
   const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'json' | 'analysis'>('overview');
   const [jsonViewExpanded, setJsonViewExpanded] = useState(false);
-
-  useEffect(() => {
-    loadAllProblemData();
-  }, []);
-
-  const loadAllProblemData = async () => {
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      console.log('Loading all problems...');
-      const allProblems = await ProblemLoader.loadAllProblems();
-      
-      const problemDataArray: ProblemData[] = [];
-      
-      for (const problem of allProblems) {
-        try {
-          const summary = generateProblemSummary(problem);
-          const analysis = analyzeProblem(problem);
-          const validation = validateProblemDataDetailed(problem);
-          
-          problemDataArray.push({
-            problem,
-            summary,
-            analysis,
-            validation
-          });
-        } catch (error) {
-          console.error(`Failed to analyze problem ${problem.id}:`, error);
-        }
-      }
-      
-      setProblems(problemDataArray);
-      if (problemDataArray.length > 0) {
-        setSelectedProblem(problemDataArray[0]);
-      }
-      
-      setLoadingState({ isLoading: false, error: null });
-      console.log(`Successfully loaded ${problemDataArray.length} problems`);
-      
-    } catch (error) {
-      console.error('Failed to load problems:', error);
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof ProblemLoaderError ? error.message : 'Unknown error occurred' 
-      });
-    }
-  };
 
   const navigateProblem = (direction: 'prev' | 'next') => {
     if (!selectedProblem) return;
@@ -118,7 +67,7 @@ export default function ProblemsDemo() {
     setSelectedProblem(problems[newIndex]);
   };
 
-  if (loadingState.isLoading) {
+  if (problems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
@@ -127,38 +76,12 @@ export default function ProblemsDemo() {
           </Link>
         </div>
         
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
-            <h2 className="text-lg font-semibold mb-2">問題データを読み込み中...</h2>
-            <p className="text-muted-foreground">問題ローダーがJSONファイルを解析しています</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadingState.error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
-            ← ホームに戻る
-          </Link>
-        </div>
-        
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
           <div className="flex items-center gap-3 mb-4">
-            <AlertCircle className="h-6 w-6 text-red-600" />
-            <h2 className="text-lg font-semibold text-red-800 dark:text-red-200">読み込みエラー</h2>
+            <AlertCircle className="h-6 w-6 text-yellow-600" />
+            <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">問題データが見つかりません</h2>
           </div>
-          <p className="text-red-700 dark:text-red-300 mb-4">{loadingState.error}</p>
-          <button 
-            onClick={loadAllProblemData}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          >
-            再試行
-          </button>
+          <p className="text-yellow-700 dark:text-yellow-300">問題データファイルの確認を行ってください。</p>
         </div>
       </div>
     );
@@ -703,3 +626,44 @@ export default function ProblemsDemo() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps<ProblemsPageProps> = async () => {
+  try {
+    const allProblems = await ProblemLoader.loadAllProblems();
+    
+    const problemDataArray: ProblemData[] = [];
+    
+    for (const problem of allProblems) {
+      try {
+        const summary = generateProblemSummary(problem);
+        const analysis = analyzeProblem(problem);
+        const validation = validateProblemDataDetailed(problem);
+        
+        problemDataArray.push({
+          problem,
+          summary,
+          analysis,
+          validation
+        });
+      } catch (error) {
+        console.error(`Failed to analyze problem ${problem.id}:`, error);
+      }
+    }
+    
+    return {
+      props: {
+        problems: problemDataArray
+      },
+      revalidate: 3600 // 1時間ごとに再生成
+    };
+  } catch (error) {
+    console.error('Failed to load problems during static generation:', error);
+    
+    return {
+      props: {
+        problems: []
+      },
+      revalidate: 60 // エラー時は1分後に再試行
+    };
+  }
+};

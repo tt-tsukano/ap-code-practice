@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { QueryResult } from '@/lib/query-executor';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import SqlRunner to avoid SSR issues
@@ -20,6 +20,11 @@ const SqlRunner = dynamic(() => import('@/components/SqlRunner').then(mod => ({ 
 
 export default function SqlDemo() {
   const [lastResult, setLastResult] = useState<QueryResult | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleQueryComplete = (result: QueryResult) => {
     setLastResult(result);
@@ -45,9 +50,20 @@ export default function SqlDemo() {
       
       <div className="space-y-6">
         {/* Main SqlRunner */}
-        <SqlRunner
-          onQueryComplete={handleQueryComplete}
-        />
+        {isMounted ? (
+          <SqlRunner
+            onQueryComplete={handleQueryComplete}
+          />
+        ) : (
+          <div className="bg-card text-card-foreground p-6 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+              <span className="text-sm text-muted-foreground">
+                コンポーネントを準備中...
+              </span>
+            </div>
+          </div>
+        )}
         
         {/* Additional Information */}
         <div className="bg-muted/50 border rounded-lg p-4 space-y-2">

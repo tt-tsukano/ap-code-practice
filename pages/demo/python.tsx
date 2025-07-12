@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ExecutionResult } from '@/lib/code-executor';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import PyodideRunner to avoid SSR issues
@@ -20,6 +20,11 @@ const PyodideRunner = dynamic(() => import('@/components/PyodideRunner').then(mo
 
 export default function PythonDemo() {
   const [lastResult, setLastResult] = useState<ExecutionResult | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleExecutionComplete = (result: ExecutionResult) => {
     setLastResult(result);
@@ -45,9 +50,20 @@ export default function PythonDemo() {
       
       <div className="space-y-6">
         {/* Main PyodideRunner */}
-        <PyodideRunner
-          onExecutionComplete={handleExecutionComplete}
-        />
+        {isMounted ? (
+          <PyodideRunner
+            onExecutionComplete={handleExecutionComplete}
+          />
+        ) : (
+          <div className="bg-card text-card-foreground p-6 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+              <span className="text-sm text-muted-foreground">
+                コンポーネントを準備中...
+              </span>
+            </div>
+          </div>
+        )}
         
         {/* Additional Information */}
         <div className="bg-muted/50 border rounded-lg p-4 space-y-2">
