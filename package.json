@@ -5,13 +5,17 @@
   "scripts": {
     "dev": "next dev --port 3000 --hostname localhost",
     "dev-turbo": "next dev --turbo --port 3000 --hostname localhost",
+    "dev-debug": "NODE_OPTIONS='--inspect' next dev --port 3000 --hostname localhost",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next && rm -rf node_modules/.cache"
+    "clean": "rm -rf .next && rm -rf node_modules/.cache",
+    "check-port": "node check-port.js",
+    "test-static": "node test-static.js",
+    "kill-processes": "killall node || true"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

@@ -8,7 +8,7 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   
-  // Fast Refresh無効化
+  // Fast Refresh完全無効化
   fastRefresh: false,
   
   // TypeScriptとESLintエラー無視
@@ -24,6 +24,25 @@ const nextConfig = {
   
   // SWC無効化
   swcMinify: false,
+  
+  // webpack設定でファイルウォッチャー無効化
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // ファイルウォッチャー無効化
+      config.watchOptions = {
+        ignored: /node_modules/,
+        poll: false, // ポーリングを無効化
+        aggregateTimeout: 5000, // 5秒の遅延
+      };
+      
+      // Hot Module Replacement無効化
+      config.plugins = config.plugins.filter(
+        plugin => plugin.constructor.name !== 'HotModuleReplacementPlugin'
+      );
+    }
+    
+    return config;
+  },
 };
 
 export default nextConfig;
