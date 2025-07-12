@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3000 --hostname localhost",
+    "dev-turbo": "next dev --turbo --port 3000 --hostname localhost",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next && rm -rf node_modules/.cache"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
