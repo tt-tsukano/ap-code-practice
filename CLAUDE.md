@@ -4,17 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Next.js 14 + TypeScript project for creating browser-based Python and SQL execution environments. The project integrates Pyodide for running Python code and sql.js for SQL queries directly in the browser.
-
-## Key Technologies
-
-- **Next.js 14** (Pages Router - App Router is prohibited)
-- **TypeScript** (strict mode enabled)
-- **Tailwind CSS + Shadcn/ui** for styling
-- **Pyodide** for browser-based Python execution (planned)
-- **sql.js** for browser-based SQL execution (planned)
-- **Monaco Editor** for code editing (planned)
-- **Vercel** for deployment
+This is a Vite + React + TypeScript project implementing a browser-based Python and SQL execution environment for educational purposes, specifically designed for practicing Japanese Applied Information Technology Engineer exam problems. The project integrates Pyodide for running Python code and sql.js for SQL queries directly in the browser.
 
 ## Development Commands
 
@@ -28,8 +18,8 @@ npm run dev
 # Build for production
 npm run build
 
-# Start production server
-npm start
+# Preview production build
+npm run preview
 
 # Lint code
 npm run lint
@@ -42,119 +32,127 @@ npm run format
 
 # Type checking
 npm run type-check
+
+# Clean cache and build artifacts
+npm run clean
+
+# Check if port 3000 is available
+npm run check-port
+
+# Kill Node processes (debugging)
+npm run kill-processes
 ```
 
-## Project Architecture
+## Key Technologies & Architecture
 
-### Current Structure
-```
-/
-├── pages/                 # Next.js Pages Router
-│   ├── _app.tsx          # App wrapper with ThemeProvider
-│   ├── _document.tsx     # HTML document configuration
-│   ├── index.tsx         # Landing page with demo navigation
-│   └── demo/             # Demo pages (placeholder content)
-│       ├── python.tsx    # Python execution demo
-│       ├── sql.tsx       # SQL execution demo
-│       └── combined.tsx  # Combined demo
-├── components/
-│   ├── ui/               # Shadcn/ui components
-│   ├── layout.tsx        # Main layout with header and theme toggle
-│   ├── theme-provider.tsx # Next-themes provider
-│   └── theme-toggle.tsx  # Dark/light mode toggle
-├── lib/
-│   └── utils.ts          # Tailwind utility functions
-└── styles/
-    └── globals.css       # Global styles and Tailwind imports
-```
+- **Vite** (Fast build tool and dev server)
+- **React 18** with React Router for routing
+- **TypeScript** (strict mode enabled) 
+- **Tailwind CSS + Shadcn/ui** for styling
+- **Pyodide** for browser-based Python execution
+- **sql.js** for browser-based SQL execution  
+- **Monaco Editor** for code editing
+- **Vercel** for deployment
 
-### Future Implementation Structure
-Based on the project specifications (依頼書.md), the following components will be implemented:
+## Core Architecture Components
 
-```
-components/
-├── PyodideRunner.tsx      # Python code execution component
-├── CodeEditor.tsx         # Monaco Editor wrapper
-├── ExecutionResult.tsx    # Result display component
-├── SqlRunner.tsx          # SQL execution component
-├── SqlEditor.tsx          # SQL editor component
-├── ResultTable.tsx        # SQL result table
-└── SchemaBuilder.tsx      # Database schema builder
+### Problem Management System
+- **`types/problem.ts`**: Comprehensive TypeScript interfaces for algorithm and database problems
+- **`lib/problem-loader.ts`**: Problem data loading with caching and validation
+- **`lib/problem-utils.ts`**: Problem analysis and utility functions
+- **`data/problems/`**: JSON problem data files organized by category
 
-lib/
-├── pyodide-loader.ts      # Pyodide initialization
-├── code-executor.ts       # Python code execution logic
-├── sql-loader.ts          # sql.js initialization
-└── query-executor.ts      # SQL query execution logic
-```
+### Code Execution System
+- **`lib/pyodide-loader.ts`**: Pyodide initialization and script loading
+- **`lib/code-executor.ts`**: Python code execution with timeout and error handling
+- **`lib/sql-loader.ts`**: sql.js initialization
+- **`lib/query-executor.ts`**: SQL query execution
+- **`lib/error-monitoring.ts`**: Performance monitoring and error tracking
 
-## Next.js Configuration
+### UI Components
+- **`components/PyodideRunner.tsx`**: Python code execution interface
+- **`components/SqlRunner.tsx`**: SQL execution interface
+- **`components/CodeEditor.tsx`**: Monaco Editor wrapper
+- **`components/ExecutionResult.tsx`**: Result display
+- **`components/ResultTable.tsx`**: SQL result visualization
+- **`components/SchemaBuilder.tsx`**: Database schema management
 
-### WASM Support
-The project is configured for WebAssembly support:
-- `asyncWebAssembly: true` in webpack config
-- CORS headers for Pyodide/sql.js WASM loading:
-  - `Cross-Origin-Embedder-Policy: require-corp`
-  - `Cross-Origin-Opener-Policy: same-origin`
+## Critical Configuration
 
-### Deployment
-- Vercel deployment ready with `vercel.json` configuration
-- Appropriate CORS headers for production
+### Vite Configuration
+- **HMR**: Hot Module Replacement enabled for fast development
+- **Code Splitting**: Automatic chunk splitting for optimal loading
+- **WASM Support**: Configured for Pyodide and sql.js
+- **Path Resolution**: @ alias points to src/ directory
+- **Build Optimization**: Target ES2020 with modern features
 
-## Key Implementation Requirements
+### CORS Headers for WASM
+Required for Pyodide and sql.js:
+- `Cross-Origin-Embedder-Policy: require-corp`
+- `Cross-Origin-Opener-Policy: same-origin`
 
-### Security & Performance Constraints
-- **Execution time limits**: Python code execution must timeout after 30 seconds
-- **Memory management**: Prevent memory leaks from WASM modules
-- **XSS protection**: Sanitize all user input and execution results
+## Problem Data Structure
 
-### TypeScript Interfaces
-Key interfaces for execution results (to be implemented):
-```typescript
-interface ExecutionResult {
-  success: boolean;
-  output: string;
-  error?: string;
-  executionTime: number;
-}
+### Algorithm Problems (`r4s-q8.json`)
+- Pseudocode with fill-in-the-blank sections
+- Multiple choice options with explanations
+- Test cases for validation
+- Structured with `AlgorithmProblem` interface
 
-interface QueryResult {
-  success: boolean;
-  data: any[][];
-  columns: string[];
-  error?: string;
-  executionTime: number;
-}
+### Database Problems (`r4s-q3.json`)
+- Database schema definitions
+- SQL query templates with blanks
+- Expected result sets
+- Structured with `DatabaseProblem` interface
 
-interface SchemaDefinition {
-  tableName: string;
-  createStatement: string;
-  insertStatements: string[];
-}
-```
+## Key Implementation Patterns
 
-### Browser Compatibility
-- Chrome 90+, Firefox 90+, Safari 14+, Edge 90+
-- Mobile browser support (iOS Safari, Chrome Mobile)
-- WASM support required for Pyodide and sql.js
+### Execution Flow
+1. **Initialization**: Pyodide/sql.js loaded asynchronously via CDN
+2. **Code Execution**: 30-second timeout with custom stdout/stderr capture
+3. **Error Handling**: Comprehensive error monitoring and user feedback
+4. **Result Display**: Formatted output with execution time metrics
 
-### Performance Targets
-- Initial page load: <3 seconds
-- Pyodide initialization: <5 seconds
-- sql.js initialization: <1 second
-- Bundle size: <500KB (excluding WASM files)
+### Performance Optimization
+- **Problem Caching**: 5-minute TTL for loaded problems
+- **Lazy Loading**: WASM modules loaded on demand
+- **Request Idle Callback**: Non-blocking script loading
+- **Static Generation**: Problems pre-loaded at build time
 
-## Theme System
-
-The project uses `next-themes` for dark mode support:
-- System preference detection
-- Manual theme switching via toggle button
-- Tailwind CSS dark mode classes
+### Type Safety
+- Strict TypeScript configuration
+- Runtime validation with `validateProblemData()`
+- Type guards for problem categories (`isAlgorithmProblem`, `isDatabaseProblem`)
+- Comprehensive interfaces in `types/problem.ts`
 
 ## Development Notes
 
-- **Pages Router Only**: Do not use App Router (explicitly prohibited)
-- **Strict TypeScript**: All code must pass strict type checking
-- **Responsive Design**: All components must work on mobile devices
-- **Dark Mode**: Full dark mode support required
-- **Error Handling**: Comprehensive error handling for WASM initialization failures, timeouts, and execution errors
+- **React Router**: Client-side routing with React Router DOM
+- **Fast Development**: Vite provides instant HMR and fast builds
+- **WASM Dependencies**: Pyodide and sql.js loaded from CDN
+- **Error Monitoring**: Built-in performance and error tracking
+- **Mobile Support**: Responsive design for all screen sizes
+- **Dark Mode**: Full theme switching with next-themes
+
+## Debugging & Troubleshooting
+
+### Build Issues
+If experiencing build problems:
+1. Run `npm run clean` to clear caches
+2. Check TypeScript errors with `npm run type-check`
+3. Verify all imports use correct paths (@ alias points to src/)
+
+### WASM Loading Issues
+- Verify CORS headers in `vercel.json`
+- Check browser console for security policy errors
+- Ensure CDN URLs are accessible
+
+### Problem Data Issues
+- Use `src/pages/demo/problems.tsx` to validate problem data
+- Check JSON syntax and schema compliance
+- Verify problem IDs match file naming convention
+
+### Dynamic Import Warnings
+- Vite may show warnings for dynamic imports in problem-loader.ts
+- These warnings are expected and don't affect functionality
+- Add `/* @vite-ignore */` comment if needed to suppress warnings
