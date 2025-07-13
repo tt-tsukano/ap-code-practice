@@ -57,6 +57,20 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* Pseudo Code Converter */}
+        <div className="border rounded-lg p-6 mb-12 hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-3">擬似言語変換エンジン</h2>
+          <p className="text-gray-600 mb-4">
+            IPA応用情報技術者試験の擬似言語をPythonコードに自動変換。ルールベース変換とAST解析を組み合わせた高精度変換エンジンです。
+          </p>
+          <Link 
+            href="/demo/converter" 
+            className="inline-flex items-center justify-center rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors"
+          >
+            変換エンジンを試す
+          </Link>
+        </div>
+
         {/* Test Simple Page Link */}
         <div className="border rounded-lg p-6 mb-12 hover:shadow-lg transition-shadow">
           <h2 className="text-xl font-semibold mb-3">テストページ</h2>
