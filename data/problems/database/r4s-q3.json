@@ -1,0 +1,446 @@
+{
+  "id": "r4s-q3",
+  "title": "販売管理システムのデータ分析",
+  "year": "2022",
+  "season": "spring",
+  "number": 3,
+  "category": "database",
+  "difficulty": "intermediate",
+  "estimatedTime": 30,
+
+  "description": "ある企業の販売管理システムにおいて、商品の売上データを分析するためのSQL問題です。複数のテーブルから必要な情報を抽出し、集約関数とJOIN演算を使用してビジネス要件を満たすクエリを作成します。",
+
+  "scenario": "ABC商事株式会社では、全国に展開する店舗での商品販売を管理するためのデータベースシステムを運用しています。このシステムでは、商品情報、店舗情報、販売実績を管理し、経営陣が売上分析や在庫管理の意思決定を行うための各種レポートを提供しています。今回は、四半期ごとの売上分析レポートを作成するためのSQL文を作成する必要があります。",
+
+  "schema": [
+    {
+      "tableName": "商品",
+      "description": "商品マスタテーブル - 販売する全商品の基本情報",
+      "columns": [
+        {
+          "name": "商品ID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "商品の一意識別子（P001, P002, ...）"
+        },
+        {
+          "name": "商品名",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "商品の正式名称"
+        },
+        {
+          "name": "単価",
+          "type": "INTEGER",
+          "nullable": false,
+          "description": "商品の標準販売価格（円）"
+        },
+        {
+          "name": "カテゴリID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "商品カテゴリの識別子"
+        }
+      ],
+      "primaryKey": ["商品ID"],
+      "foreignKeys": [
+        {
+          "column": "カテゴリID",
+          "referencedTable": "カテゴリ",
+          "referencedColumn": "カテゴリID"
+        }
+      ],
+      "sampleData": [
+        ["P001", "ノートPC ProBook", 98000, "C001"],
+        ["P002", "ワイヤレスマウス", 2800, "C002"],
+        ["P003", "USB-Cキーボード", 6500, "C002"],
+        ["P004", "27インチモニター", 45000, "C003"],
+        ["P005", "Webカメラ HD", 8900, "C002"],
+        ["P006", "デスクトップPC", 128000, "C001"],
+        ["P007", "タブレット 10インチ", 35000, "C004"],
+        ["P008", "プリンター複合機", 25000, "C003"]
+      ]
+    },
+    {
+      "tableName": "カテゴリ",
+      "description": "商品カテゴリマスタテーブル",
+      "columns": [
+        {
+          "name": "カテゴリID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "カテゴリの一意識別子"
+        },
+        {
+          "name": "カテゴリ名",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "カテゴリの表示名"
+        },
+        {
+          "name": "説明",
+          "type": "TEXT",
+          "nullable": true,
+          "description": "カテゴリの詳細説明"
+        }
+      ],
+      "primaryKey": ["カテゴリID"],
+      "foreignKeys": [],
+      "sampleData": [
+        ["C001", "コンピューター", "デスクトップ・ノートPC関連"],
+        ["C002", "周辺機器", "マウス・キーボード・Webカメラ等"],
+        ["C003", "ディスプレイ機器", "モニター・プリンター等"],
+        ["C004", "モバイル機器", "タブレット・スマートフォン関連"]
+      ]
+    },
+    {
+      "tableName": "店舗",
+      "description": "店舗マスタテーブル - 全国の販売拠点情報",
+      "columns": [
+        {
+          "name": "店舗ID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "店舗の一意識別子"
+        },
+        {
+          "name": "店舗名",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "店舗の正式名称"
+        },
+        {
+          "name": "地域",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "店舗所在地域（関東、関西等）"
+        },
+        {
+          "name": "開店日",
+          "type": "DATE",
+          "nullable": false,
+          "description": "店舗の開業日"
+        }
+      ],
+      "primaryKey": ["店舗ID"],
+      "foreignKeys": [],
+      "sampleData": [
+        ["S001", "新宿本店", "関東", "2018-04-01"],
+        ["S002", "大阪梅田店", "関西", "2019-07-15"],
+        ["S003", "横浜みなとみらい店", "関東", "2020-03-10"],
+        ["S004", "京都河原町店", "関西", "2020-11-20"],
+        ["S005", "名古屋栄店", "中部", "2021-02-05"]
+      ]
+    },
+    {
+      "tableName": "売上",
+      "description": "売上実績テーブル - 日々の販売トランザクション",
+      "columns": [
+        {
+          "name": "売上ID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "売上レコードの一意識別子"
+        },
+        {
+          "name": "商品ID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "販売された商品の識別子"
+        },
+        {
+          "name": "店舗ID",
+          "type": "TEXT",
+          "nullable": false,
+          "description": "販売を行った店舗の識別子"
+        },
+        {
+          "name": "販売日",
+          "type": "DATE",
+          "nullable": false,
+          "description": "商品が販売された日付"
+        },
+        {
+          "name": "数量",
+          "type": "INTEGER",
+          "nullable": false,
+          "description": "販売された商品の個数"
+        },
+        {
+          "name": "販売単価",
+          "type": "INTEGER",
+          "nullable": false,
+          "description": "実際の販売価格（割引等適用後）"
+        }
+      ],
+      "primaryKey": ["売上ID"],
+      "foreignKeys": [
+        {
+          "column": "商品ID",
+          "referencedTable": "商品",
+          "referencedColumn": "商品ID"
+        },
+        {
+          "column": "店舗ID",
+          "referencedTable": "店舗",
+          "referencedColumn": "店舗ID"
+        }
+      ],
+      "sampleData": [
+        ["T001", "P001", "S001", "2022-01-15", 2, 98000],
+        ["T002", "P002", "S001", "2022-01-16", 5, 2800],
+        ["T003", "P003", "S002", "2022-01-20", 3, 6500],
+        ["T004", "P004", "S003", "2022-02-01", 1, 45000],
+        ["T005", "P001", "S002", "2022-02-05", 1, 95000],
+        ["T006", "P005", "S001", "2022-02-10", 4, 8900],
+        ["T007", "P006", "S004", "2022-03-01", 1, 128000],
+        ["T008", "P007", "S005", "2022-03-15", 2, 35000],
+        ["T009", "P002", "S003", "2022-03-20", 8, 2800],
+        ["T010", "P008", "S001", "2022-04-05", 1, 25000],
+        ["T011", "P004", "S002", "2022-04-10", 2, 45000],
+        ["T012", "P001", "S005", "2022-04-25", 3, 98000]
+      ]
+    }
+  ],
+
+  "queries": [
+    {
+      "id": "query_1",
+      "description": "各カテゴリの2022年第1四半期（1-3月）売上合計を求める",
+      "queryTemplate": "SELECT c.カテゴリ名, ［　ア　］ AS 売上合計\nFROM カテゴリ c\nJOIN 商品 p ON c.カテゴリID = p.カテゴリID\nJOIN 売上 s ON p.商品ID = s.商品ID\nWHERE ［　イ　］\n［　ウ　］\nORDER BY 売上合計 DESC",
+      "blanks": [
+        {
+          "id": "blank_a",
+          "position": 1,
+          "type": "expression",
+          "description": "売上合計を計算するSELECT句の集約関数",
+          "options": [
+            {
+              "key": "ア",
+              "value": "SUM(s.販売単価 * s.数量)",
+              "description": "販売単価×数量の合計（正解）"
+            },
+            {
+              "key": "イ",
+              "value": "COUNT(s.売上ID)",
+              "description": "売上レコード数の合計"
+            },
+            {
+              "key": "ウ",
+              "value": "AVG(s.販売単価)",
+              "description": "販売単価の平均値"
+            },
+            {
+              "key": "エ",
+              "value": "MAX(s.数量)",
+              "description": "数量の最大値"
+            }
+          ],
+          "correct": "ア",
+          "explanation": "売上合計は「販売単価 × 数量」の総和で計算します。SUM関数を使用して、各売上レコードの金額（販売単価×数量）を合計することで、カテゴリごとの売上合計を求めることができます。"
+        },
+        {
+          "id": "blank_b",
+          "position": 4,
+          "type": "condition",
+          "description": "2022年第1四半期の期間を指定するWHERE条件",
+          "options": [
+            {
+              "key": "ア",
+              "value": "s.販売日 >= '2022-01-01' AND s.販売日 <= '2022-12-31'",
+              "description": "2022年全体の期間"
+            },
+            {
+              "key": "イ",
+              "value": "s.販売日 >= '2022-01-01' AND s.販売日 <= '2022-03-31'",
+              "description": "2022年第1四半期（1-3月）の期間（正解）"
+            },
+            {
+              "key": "ウ",
+              "value": "s.販売日 >= '2022-04-01' AND s.販売日 <= '2022-06-30'",
+              "description": "2022年第2四半期（4-6月）の期間"
+            },
+            {
+              "key": "エ",
+              "value": "YEAR(s.販売日) = 2022",
+              "description": "2022年全体（YEAR関数使用）"
+            }
+          ],
+          "correct": "イ",
+          "explanation": "第1四半期は1月から3月までの期間です。販売日が2022-01-01以上2022-03-31以下の条件を指定することで、対象期間の売上データのみを抽出できます。"
+        },
+        {
+          "id": "blank_c",
+          "position": 5,
+          "type": "statement",
+          "description": "カテゴリごとに集計するためのGROUP BY句",
+          "options": [
+            {
+              "key": "ア",
+              "value": "GROUP BY c.カテゴリID",
+              "description": "カテゴリIDでグループ化"
+            },
+            {
+              "key": "イ",
+              "value": "GROUP BY c.カテゴリ名",
+              "description": "カテゴリ名でグループ化（正解）"
+            },
+            {
+              "key": "ウ",
+              "value": "GROUP BY s.商品ID",
+              "description": "商品IDでグループ化"
+            },
+            {
+              "key": "エ",
+              "value": "GROUP BY s.店舗ID",
+              "description": "店舗IDでグループ化"
+            }
+          ],
+          "correct": "イ",
+          "explanation": "SELECT句でc.カテゴリ名を選択しているため、GROUP BY句でも同じc.カテゴリ名を指定する必要があります。これにより、カテゴリごとに売上を集計することができます。"
+        }
+      ],
+      "expectedResult": {
+        "columns": ["カテゴリ名", "売上合計"],
+        "data": [
+          ["コンピューター", 291000],
+          ["周辺機器", 73100],
+          ["ディスプレイ機器", 67400],
+          ["モバイル機器", 70000]
+        ],
+        "description": "2022年第1四半期のカテゴリ別売上合計（降順）"
+      },
+      "explanation": "この問題では、複数テーブルの結合（JOIN）と集約関数（SUM）を組み合わせて、ビジネス要件を満たすクエリを作成します。カテゴリテーブル、商品テーブル、売上テーブルを適切に結合し、指定期間での売上合計をカテゴリごとに算出します。"
+    },
+    {
+      "id": "query_2",
+      "description": "地域別の店舗数と総売上を求める",
+      "queryTemplate": "SELECT st.地域,\n       COUNT(DISTINCT st.店舗ID) AS 店舗数,\n       ［　ア　］ AS 総売上\nFROM 店舗 st\n［　イ　］ 売上 s ON st.店舗ID = s.店舗ID\nWHERE s.販売日 >= '2022-01-01' AND s.販売日 <= '2022-12-31'\nGROUP BY ［　ウ　］\nORDER BY 総売上 DESC",
+      "blanks": [
+        {
+          "id": "blank_d",
+          "position": 3,
+          "type": "expression",
+          "description": "総売上を計算する集約関数",
+          "options": [
+            {
+              "key": "ア",
+              "value": "SUM(s.販売単価 * s.数量)",
+              "description": "販売金額の合計（正解）"
+            },
+            {
+              "key": "イ",
+              "value": "COUNT(s.売上ID)",
+              "description": "売上件数の合計"
+            },
+            {
+              "key": "ウ",
+              "value": "AVG(s.販売単価)",
+              "description": "販売単価の平均"
+            },
+            {
+              "key": "エ",
+              "value": "SUM(s.数量)",
+              "description": "販売数量の合計"
+            }
+          ],
+          "correct": "ア",
+          "explanation": "総売上は販売単価×数量の合計で計算します。各売上レコードの金額をSUM関数で合計することで、地域全体の売上金額を求めることができます。"
+        },
+        {
+          "id": "blank_e",
+          "position": 4,
+          "type": "statement",
+          "description": "店舗テーブルと売上テーブルを結合するJOIN文",
+          "options": [
+            {
+              "key": "ア",
+              "value": "INNER JOIN",
+              "description": "内部結合（両テーブルにデータがある場合のみ）"
+            },
+            {
+              "key": "イ",
+              "value": "LEFT JOIN",
+              "description": "左外部結合（売上がない店舗も含む）（正解）"
+            },
+            {
+              "key": "ウ",
+              "value": "RIGHT JOIN",
+              "description": "右外部結合（店舗情報がない売上も含む）"
+            },
+            {
+              "key": "エ",
+              "value": "FULL OUTER JOIN",
+              "description": "完全外部結合（両方のテーブルの全データ）"
+            }
+          ],
+          "correct": "イ",
+          "explanation": "売上実績がない店舗も地域の店舗数に含める必要があるため、LEFT JOINを使用します。これにより、売上データがない店舗も結果に含まれ、正確な店舗数をカウントできます。"
+        },
+        {
+          "id": "blank_f",
+          "position": 6,
+          "type": "expression",
+          "description": "地域ごとにグループ化するGROUP BY句",
+          "options": [
+            {
+              "key": "ア",
+              "value": "st.店舗ID",
+              "description": "店舗IDでグループ化"
+            },
+            {
+              "key": "イ",
+              "value": "st.地域",
+              "description": "地域でグループ化（正解）"
+            },
+            {
+              "key": "ウ",
+              "value": "s.販売日",
+              "description": "販売日でグループ化"
+            },
+            {
+              "key": "エ",
+              "value": "st.店舗名",
+              "description": "店舗名でグループ化"
+            }
+          ],
+          "correct": "イ",
+          "explanation": "地域別の集計を行うため、GROUP BY句でst.地域を指定します。これにより、同じ地域の店舗がグループ化され、地域ごとの店舗数と総売上を計算できます。"
+        }
+      ],
+      "expectedResult": {
+        "columns": ["地域", "店舗数", "総売上"],
+        "data": [
+          ["関東", 2, 432400],
+          ["関西", 2, 233500],
+          ["中部", 1, 294000]
+        ],
+        "description": "2022年の地域別店舗数と総売上（売上降順）"
+      },
+      "explanation": "この問題では、LEFT JOINを使用して売上実績がない店舗も含めた地域別分析を行います。COUNT(DISTINCT)を使用して重複を避けた店舗数の計算と、SUM関数による総売上の計算を組み合わせています。"
+    }
+  ],
+
+  "explanation": "このデータベース問題では、販売管理システムの典型的なデータ分析クエリを扱います。\n\n【学習ポイント】\n\n1. **多テーブル結合（JOIN）**\n   - INNER JOIN: 両テーブルにデータがある場合のみ結合\n   - LEFT JOIN: 左テーブルの全レコードを保持して結合\n   - 外部キー制約に基づく適切な結合条件の設定\n\n2. **集約関数の活用**\n   - SUM(): 合計値の計算（売上金額等）\n   - COUNT(): レコード数の計算\n   - COUNT(DISTINCT): 重複を除いたカウント\n   - AVG(), MAX(), MIN(): その他の統計関数\n\n3. **GROUP BY句の理解**\n   - 集約の単位を指定（カテゴリ別、地域別等）\n   - SELECT句の非集約列は必ずGROUP BYに含める\n   - 適切なグループ化による意味のある集計\n\n4. **WHERE句による条件絞り込み**\n   - 日付範囲の指定（四半期、年度等）\n   - 論理演算子（AND, OR）の適切な使用\n   - 効率的なデータ抽出\n\n5. **ORDER BY句によるソート**\n   - ビジネス要件に応じた並び順（売上降順等）\n   - 複数列でのソート\n\n【実務での応用】\n- 売上分析レポートの作成\n- KPI（重要業績評価指標）の算出\n- 地域別・商品別の業績比較\n- 意思決定のためのデータ可視化",
+
+  "hints": [
+    "JOIN演算では、まず「どのテーブル同士を」「どの列で」結合するかを明確にしましょう。外部キー制約を確認すると結合条件がわかります。",
+    "売上金額の計算では「販売単価 × 数量」の式を使用します。SUM関数でこれらの積を合計することで、総売上を求めることができます。",
+    "GROUP BY句は「集計の単位」を決めます。「カテゴリ別」なら「カテゴリ名」、「地域別」なら「地域」でグループ化します。",
+    "日付の範囲指定では、開始日は「>=」（以上）、終了日は「<=」（以下）を使用します。第1四半期は1月1日から3月31日までです。",
+    "LEFT JOINは「左側のテーブルの全レコードを保持」します。店舗数を正確にカウントするため、売上がない店舗も含める必要がある場合に使用します。"
+  ],
+
+  "relatedTopics": [
+    "JOIN演算（内部結合・外部結合）",
+    "集約関数（SUM・COUNT・AVG等）",
+    "GROUP BY句とHAVING句",
+    "WHERE句による条件指定",
+    "ORDER BY句によるソート",
+    "外部キー制約",
+    "正規化とテーブル設計",
+    "日付・時刻データの処理",
+    "ビジネスインテリジェンス",
+    "データ分析とレポート作成"
+  ]
+}

@@ -23,13 +23,42 @@ cd ap-code-practice
 cd ap-code-practice
 ```
 
-### 2. 依存関係のインストール
+### 2. 環境変数の設定
+
+プロジェクトルートに `.env.local` ファイルを作成し、以下の内容を追加してください：
+
+```bash
+# Next.js環境変数 - 無限リロード問題解決用設定
+
+# Fast Refresh無効化
+FAST_REFRESH=false
+
+# TypeScriptエラー無視
+NEXT_IGNORE_TYPESCRIPT_ERRORS=true
+
+# ESLintエラー無視
+NEXT_IGNORE_ESLINT_ERRORS=true
+
+# 詳細ログ無効化
+NEXT_TELEMETRY_DISABLED=1
+
+# SWC無効化（Babelフォールバック）
+SWC_DISABLE=true
+
+# 開発サーバー設定
+HOST=localhost
+PORT=3000
+```
+
+> **重要**: この設定は開発環境での無限リロード問題を解決するために必要です。`.env.local`ファイルは`.gitignore`に含まれているため、各環境で手動作成が必要です。
+
+### 3. 依存関係のインストール
 
 ```bash
 npm install
 ```
 
-### 3. 開発サーバーの起動
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -40,8 +69,11 @@ npm run dev
 ## 📋 利用可能なコマンド
 
 ```bash
-# 開発サーバー起動
+# 開発サーバー起動（推奨）
 npm run dev
+
+# 開発サーバー起動（Turboモード）
+npm run dev-turbo
 
 # 本番用ビルド
 npm run build
@@ -60,6 +92,9 @@ npm run format
 
 # TypeScript型チェック
 npm run type-check
+
+# キャッシュクリア
+npm run clean
 ```
 
 ## 🌐 デプロイ
@@ -122,6 +157,40 @@ npm run type-check
 - WASM（WebAssembly）ファイルのサイズが大きいため、初期読み込みに時間がかかることがあります
 
 ## 🐛 トラブルシューティング
+
+### 無限リロード問題が発生した場合
+
+**症状**: ブラウザでページが無限にリロードされ続ける
+
+**解決方法**:
+
+1. **`.env.local`ファイルが作成されているか確認**
+   ```bash
+   # プロジェクトルートに.env.localが存在するか確認
+   ls -la .env.local
+   ```
+
+2. **環境変数の設定を確認**
+   - 上記「環境変数の設定」セクションの内容が正しく設定されているか確認
+   - 特に `FAST_REFRESH=false` と `SWC_DISABLE=true` が重要
+
+3. **キャッシュクリアと再インストール**
+   ```bash
+   # 完全なキャッシュクリア
+   rm -rf .next
+   rm -rf node_modules
+   npm cache clean --force
+   npm install
+   ```
+
+4. **代替devコマンドの使用**
+   ```bash
+   # Turboモード無効でサーバー起動
+   npm run dev
+   
+   # または、追加オプション付きで起動
+   npm run dev-turbo
+   ```
 
 ### 依存関係エラーが発生した場合
 

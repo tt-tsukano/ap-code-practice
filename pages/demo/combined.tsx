@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ExecutionResult } from '@/lib/code-executor';
 import { QueryResult } from '@/lib/query-executor';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import components to avoid SSR issues
@@ -36,6 +36,11 @@ const SqlRunner = dynamic(() => import('@/components/SqlRunner').then(mod => ({ 
 export default function CombinedDemo() {
   const [pythonResult, setPythonResult] = useState<ExecutionResult | null>(null);
   const [sqlResult, setSqlResult] = useState<QueryResult | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handlePythonComplete = (result: ExecutionResult) => {
     setPythonResult(result);
@@ -76,9 +81,20 @@ export default function CombinedDemo() {
               </span>
             )}
           </div>
-          <PyodideRunner
-            onExecutionComplete={handlePythonComplete}
-          />
+          {isMounted ? (
+            <PyodideRunner
+              onExecutionComplete={handlePythonComplete}
+            />
+          ) : (
+            <div className="bg-card text-card-foreground p-6 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                <span className="text-sm text-muted-foreground">
+                  Pythonコンポーネントを準備中...
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* SQL Section */}
@@ -93,9 +109,20 @@ export default function CombinedDemo() {
               </span>
             )}
           </div>
-          <SqlRunner
-            onQueryComplete={handleSqlComplete}
-          />
+          {isMounted ? (
+            <SqlRunner
+              onQueryComplete={handleSqlComplete}
+            />
+          ) : (
+            <div className="bg-card text-card-foreground p-6 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+                <span className="text-sm text-muted-foreground">
+                  SQLコンポーネントを準備中...
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Combined Stats */}

@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ThemeToggle } from './theme-toggle';
 import { Home, Code, Database, Cpu, Menu, X } from 'lucide-react';
-import { useState } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -63,6 +62,7 @@ export function Layout({ children }: LayoutProps) {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="md:hidden p-2 rounded-md hover:bg-muted"
+                suppressHydrationWarning
               >
                 {isMobileMenuOpen ? (
                   <X className="h-5 w-5" />
@@ -75,7 +75,7 @@ export function Layout({ children }: LayoutProps) {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <nav className="md:hidden mt-4 pb-4 border-t pt-4">
+            <nav className="md:hidden mt-4 pb-4 border-t pt-4" suppressHydrationWarning>
               <div className="space-y-2">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プレーンHTMLテスト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>プレーンHTMLテストページ</h1>
+        <p>このページはNext.jsを一切使用していないプレーンなHTMLページです。</p>
+        <p>もしこのページが正常に表示され、無限リロードが発生しない場合、問題はNext.js側にあります。</p>
+        <p>現在の時刻: <span id="time"></span></p>
+        <a href="/test-simple" class="button">Next.jsテストページに戻る</a>
+        <a href="/" class="button">ホームページに戻る</a>
+    </div>
+
+    <script>
+        // 現在時刻を表示
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toLocaleString('ja-JP');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // ページロードのログ
+        console.log('プレーンHTMLページが正常にロードされました:', new Date().toISOString());
+    </script>
+</body>
+</html>
