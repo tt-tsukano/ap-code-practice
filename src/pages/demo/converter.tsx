@@ -4,8 +4,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import Layout from '@/components/layout';
 import { ConversionDemo } from '@/components/ConversionDemo';
 import { ConversionSteps } from '@/components/ConversionSteps';
 import { PseudoCodeConverter, ConversionResult } from '@/lib/pseudo-converter';
@@ -42,15 +40,6 @@ export default function ConverterPage() {
   };
 
   return (
-    <Layout>
-      <Head>
-        <title>擬似言語変換エンジン - デモ</title>
-        <meta 
-          name="description" 
-          content="IPA応用情報技術者試験の擬似言語をPythonコードに自動変換するエンジンのデモンストレーション" 
-        />
-      </Head>
-
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
         <div className="container mx-auto px-4 py-8">
           {/* ヘッダー */}
@@ -194,7 +183,7 @@ export default function ConverterPage() {
                   <li>• 変数宣言: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">整数型：N</code></li>
                   <li>• 配列宣言: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">配列：A(10)</code></li>
                   <li>• 代入演算: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">x ← 10</code></li>
-                  <li>• 条件分岐: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">もし x > 0 ならば</code></li>
+                  <li>• 条件分岐: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">もし x &gt; 0 ならば</code></li>
                   <li>• ループ: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">i を 0 から 9 まで 1 ずつ増やす</code></li>
                   <li>• 手続き: <code className="text-xs bg-slate-100 dark:bg-slate-700 px-1 rounded">手続き sort(配列:A, 整数:n)</code></li>
                 </ul>
@@ -266,6 +255,5 @@ export default function ConverterPage() {
           )}
         </div>
       </div>
-    </Layout>
   );
 }

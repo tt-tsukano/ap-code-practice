@@ -9,6 +9,7 @@ import PythonDemo from './pages/demo/python'
 import SqlDemo from './pages/demo/sql'
 import CombinedDemo from './pages/demo/combined'
 import ProblemsDemo from './pages/demo/problems'
+import ConverterDemo from './pages/demo/converter'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/demo/sql" element={<SqlDemo />} />
           <Route path="/demo/combined" element={<CombinedDemo />} />
           <Route path="/demo/problems" element={<ProblemsDemo />} />
+          <Route path="/demo/converter" element={<ConverterDemo />} />
         </Routes>
       </Layout>
     </ThemeProvider>

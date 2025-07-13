@@ -138,8 +138,9 @@ export function PseudoCodeViewer({
         </div>
       )}
 
-      <style jsx>{`
-        .pseudo-code-viewer :global(.pseudo-blank) {
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        .pseudo-code-viewer .pseudo-blank {
           background-color: #fef3c7;
           color: #92400e;
           padding: 2px 4px;
@@ -149,58 +150,59 @@ export function PseudoCodeViewer({
           transition: all 0.2s;
         }
         
-        .pseudo-code-viewer :global(.pseudo-blank:hover) {
+        .pseudo-code-viewer .pseudo-blank:hover {
           background-color: #fde68a;
           border-color: #d97706;
         }
         
-        .dark .pseudo-code-viewer :global(.pseudo-blank) {
+        .dark .pseudo-code-viewer .pseudo-blank {
           background-color: #451a03;
           color: #fbbf24;
           border-color: #92400e;
         }
         
-        .dark .pseudo-code-viewer :global(.pseudo-blank:hover) {
+        .dark .pseudo-code-viewer .pseudo-blank:hover {
           background-color: #78350f;
           border-color: #b45309;
         }
 
-        .pseudo-code-viewer :global(.keyword) {
+        .pseudo-code-viewer .keyword {
           color: #7c3aed;
           font-weight: 600;
         }
         
-        .pseudo-code-viewer :global(.type) {
+        .pseudo-code-viewer .type {
           color: #059669;
           font-weight: 500;
         }
         
-        .pseudo-code-viewer :global(.operator) {
+        .pseudo-code-viewer .operator {
           color: #dc2626;
           font-weight: 500;
         }
         
-        .pseudo-code-viewer :global(.comment) {
+        .pseudo-code-viewer .comment {
           color: #6b7280;
           font-style: italic;
         }
 
-        .dark .pseudo-code-viewer :global(.keyword) {
+        .dark .pseudo-code-viewer .keyword {
           color: #a78bfa;
         }
         
-        .dark .pseudo-code-viewer :global(.type) {
+        .dark .pseudo-code-viewer .type {
           color: #34d399;
         }
         
-        .dark .pseudo-code-viewer :global(.operator) {
+        .dark .pseudo-code-viewer .operator {
           color: #f87171;
         }
         
-        .dark .pseudo-code-viewer :global(.comment) {
+        .dark .pseudo-code-viewer .comment {
           color: #9ca3af;
         }
-      `}</style>
+        `
+      }} />
     </div>
   );
 }
