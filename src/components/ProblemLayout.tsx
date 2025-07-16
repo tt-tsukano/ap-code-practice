@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { AlgorithmProblem, DatabaseProblem, ExecutionResult } from '../types/problem';
 import { ProblemHeader } from './ProblemHeader';
 import { ProblemContent } from './ProblemContent';
@@ -7,6 +7,9 @@ import { BlankFillEditor } from './BlankFillEditor';
 import { ProgressIndicator } from './ProgressIndicator';
 import { ScoreDisplay } from './ScoreDisplay';
 import { CompletionBadge } from './CompletionBadge';
+import { PseudoCodeConverter, ConversionResult, ConversionOptions } from '@/lib/pseudo-converter';
+import { ConversionPreview } from './ConversionPreview';
+import { PyodideRunner } from './PyodideRunner';
 
 interface ProblemLayoutProps {
   problem: AlgorithmProblem | DatabaseProblem;
@@ -14,11 +17,11 @@ interface ProblemLayoutProps {
   validationResults: Record<string, boolean>;
   showHints: boolean;
   currentStep: 'reading' | 'solving' | 'validation' | 'completed';
-  executionResults?: ExecutionResult;
+  score: number;
   onAnswerChange: (blankId: string, selectedOption: string) => void;
   onValidationRequest: () => void;
-  onExecutionRequest: () => void;
-  onHintToggle: () => void;
+  onToggleHints: () => void;
+  onReset: () => void;
 }
 
 export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
@@ -27,12 +30,15 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
   validationResults,
   showHints,
   currentStep,
-  executionResults,
+  score,
   onAnswerChange,
   onValidationRequest,
-  onExecutionRequest,
-  onHintToggle
+  onToggleHints,
+  onReset
 }) => {
+  const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
+  const [showConverter, setShowConverter] = useState(false);
+  const [pythonCode, setPythonCode] = useState('');
   // 進捗計算
   const calculateProgress = () => {
     const blanks = problem.category === 'algorithm' 
@@ -42,7 +48,6 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
     const totalBlanks = blanks.length;
     const answeredBlanks = Object.keys(selectedAnswers).length;
     const correctBlanks = Object.values(validationResults).filter(Boolean).length;
-    const score = totalBlanks > 0 ? Math.round((correctBlanks / totalBlanks) * 100) : 0;
     
     return {
       totalBlanks,
@@ -54,6 +59,47 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
   };
 
   const progress = calculateProgress();
+
+  // 擬似コード変換処理
+  const handleConversionPreview = useCallback(async () => {
+    if (!problem || problem.category !== 'algorithm') return;
+
+    try {
+      const algorithmProblem = problem as AlgorithmProblem;
+      
+      // 穴埋め回答を反映したコードを生成
+      let codeWithAnswers = algorithmProblem.pseudoCode;
+      Object.entries(selectedAnswers).forEach(([blankId, answer]) => {
+        const blank = algorithmProblem.blanks.find(b => b.id === blankId);
+        if (blank && answer) {
+          const option = blank.options.find(opt => opt.key === answer);
+          if (option) {
+            codeWithAnswers = codeWithAnswers.replace(
+              `【${blankId.replace('blank_', '').toUpperCase()}】`, 
+              option.value
+            );
+          }
+        }
+      });
+
+      // Python変換実行
+      const options: ConversionOptions = {
+        includeComments: true,
+        validateOutput: true,
+        method: 'hybrid'
+      };
+
+      const result = PseudoCodeConverter.convert(codeWithAnswers, options);
+      setConversionResult(result);
+      
+      if (result.success) {
+        setPythonCode(result.pythonCode);
+        setShowConverter(true);
+      }
+    } catch (error) {
+      console.error('Conversion error:', error);
+    }
+  }, [problem, selectedAnswers]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,41 +134,26 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
               />
             </div>
 
-            {/* 実行結果 */}
-            {executionResults && (
+            {/* Python変換・実行セクション */}
+            {showConverter && conversionResult && (
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold mb-4">実行結果</h3>
-                {executionResults.success ? (
-                  <div className="space-y-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center mb-2">
-                        <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-green-800 font-medium">実行成功</span>
-                      </div>
-                      <pre className="text-sm text-green-700 bg-green-100 p-3 rounded">
-                        {executionResults.output}
-                      </pre>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      実行時間: {executionResults.executionTime}ms
-                      {executionResults.memoryUsage && (
-                        <span className="ml-4">メモリ使用量: {executionResults.memoryUsage}KB</span>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                      <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-red-800 font-medium">実行エラー</span>
-                    </div>
-                    <pre className="text-sm text-red-700 bg-red-100 p-3 rounded">
-                      {executionResults.error}
-                    </pre>
+                <h3 className="text-lg font-semibold mb-4">Python変換・実行</h3>
+                
+                <ConversionPreview
+                  pseudoCode={problem.category === 'algorithm' ? (problem as AlgorithmProblem).pseudoCode : ''}
+                  showSteps={false}
+                  autoUpdate={false}
+                  onConversionComplete={setConversionResult}
+                />
+                
+                {conversionResult.success && (
+                  <div className="mt-4">
+                    <PyodideRunner
+                      initialCode={conversionResult.pythonCode}
+                      onExecutionComplete={(result) => {
+                        console.log('Python execution result:', result);
+                      }}
+                    />
                   </div>
                 )}
               </div>
@@ -143,7 +174,7 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
             {/* スコア表示 */}
             {currentStep === 'validation' || currentStep === 'completed' ? (
               <ScoreDisplay
-                score={progress.score}
+                score={score}
                 showGrade={true}
                 showPercentage={true}
                 animated={true}
@@ -154,7 +185,7 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
             {currentStep === 'completed' && (
               <CompletionBadge
                 isCompleted={true}
-                score={progress.score}
+                score={score}
                 timestamp={new Date()}
                 showAnimation={true}
               />
@@ -185,8 +216,9 @@ export const ProblemLayout: React.FC<ProblemLayoutProps> = ({
               progress={progress}
               showHints={showHints}
               onValidationRequest={onValidationRequest}
-              onExecutionRequest={onExecutionRequest}
-              onHintToggle={onHintToggle}
+              onExecutionRequest={handleConversionPreview}
+              onHintToggle={onToggleHints}
+              onReset={onReset}
             />
           </div>
         </div>

@@ -13,6 +13,7 @@ interface ProblemActionsProps {
   onValidationRequest: () => void;
   onExecutionRequest: () => void;
   onHintToggle: () => void;
+  onReset?: () => void;
 }
 
 export const ProblemActions: React.FC<ProblemActionsProps> = ({
@@ -21,7 +22,8 @@ export const ProblemActions: React.FC<ProblemActionsProps> = ({
   showHints,
   onValidationRequest,
   onExecutionRequest,
-  onHintToggle
+  onHintToggle,
+  onReset
 }) => {
   // 次のステップへの進行可能性
   const canValidate = progress.answeredBlanks > 0;

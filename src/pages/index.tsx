@@ -84,6 +84,23 @@ export default function Home() {
             問題データを見る
           </Link>
         </div>
+
+        {/* Actual Learning Experience */}
+        <div className="border rounded-lg p-6 mb-12 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="flex items-center mb-3">
+            <h2 className="text-xl font-semibold">実際の学習体験</h2>
+            <span className="ml-3 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">NEW</span>
+          </div>
+          <p className="text-gray-600 mb-4">
+            完全な穴埋め問題による学習フローを体験。実際の試験問題で学習できます。
+          </p>
+          <Link 
+            to="/problems" 
+            className="inline-flex items-center justify-center rounded-md bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 text-sm font-medium hover:from-green-700 hover:to-blue-700 transition-colors"
+          >
+            学習を始める →
+          </Link>
+        </div>
       </div>
     </div>
   );
