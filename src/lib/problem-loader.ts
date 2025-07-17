@@ -255,7 +255,7 @@ export class ProblemLoader {
 
     try {
       // Next.js環境では動的インポートを使用
-      const problemData = await import(`@${filePath}`);
+      const problemData = await import(/* @vite-ignore */ `@${filePath}`);
       return problemData.default || problemData;
     } catch {
       // フォールバック: fetch APIを使用（静的ファイルとして配信されている場合）

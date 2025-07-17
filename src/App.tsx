@@ -22,7 +22,7 @@ function App() {
         <div className="min-h-screen bg-background font-sans antialiased">
           <Routes>
             {/* ホームページ */}
-            <Route path="/" element={<Navigate to="/demo" replace />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/demo" element={<HomePage />} />
             
             {/* デモページ群 */}

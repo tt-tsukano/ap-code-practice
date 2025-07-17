@@ -17,7 +17,7 @@ export default defineConfig({
 
   // Dev server configuration
   server: {
-    port: 3000,
+    port: 5173,
     host: 'localhost',
     open: true,
   },
@@ -66,7 +66,7 @@ export default defineConfig({
 
   // Preview server (for production builds)
   preview: {
-    port: 3000,
+    port: 5173,
     host: 'localhost',
   },
 })
