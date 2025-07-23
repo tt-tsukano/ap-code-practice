@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from './components/theme-provider';
 import Layout from './components/layout';
@@ -17,10 +17,9 @@ import ProblemPage from './pages/problems/[id]';
 
 function App() {
   return (
-    <Router>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <div className="min-h-screen bg-background font-sans antialiased">
-          <Routes>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <div className="min-h-screen bg-background font-sans antialiased">
+        <Routes>
             {/* ホームページ */}
             <Route path="/" element={<HomePage />} />
             <Route path="/demo" element={<HomePage />} />
@@ -69,11 +68,10 @@ function App() {
                 </div>
               </div>
             } />
-          </Routes>
-          <Toaster />
-        </div>
-      </ThemeProvider>
-    </Router>
+        </Routes>
+        <Toaster />
+      </div>
+    </ThemeProvider>
   );
 }
 
