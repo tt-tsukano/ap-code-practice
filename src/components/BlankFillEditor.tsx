@@ -79,27 +79,51 @@ export const BlankFillEditor: React.FC<BlankFillEditorProps> = ({
         const isCorrect = validationResults[blankId];
         const isCurrentBlank = currentBlank === blankId;
         
-        // 穴埋め表示のスタイル
+        // 穴埋め表示のスタイル（視覚的に分かりやすく改善）
         const blankClasses = [
           'inline-block',
-          'px-2',
-          'py-1',
+          'px-3',
+          'py-2',
           'rounded',
-          'border',
+          'border-2',
           'cursor-pointer',
           'transition-all',
           'duration-200',
-          'min-w-12',
+          'min-w-16',
           'text-center',
-          isCurrentBlank && 'ring-2 ring-blue-500',
-          selectedOption && !isCorrect && 'bg-blue-100 border-blue-300',
-          isCorrect === true && 'bg-green-100 border-green-300 text-green-800',
-          isCorrect === false && 'bg-red-100 border-red-300 text-red-800',
-          !selectedOption && 'bg-gray-100 border-gray-300 text-gray-500'
+          'font-bold',
+          'hover:shadow-lg',
+          'hover:scale-105',
+          'relative',
+          isCurrentBlank && 'ring-2 ring-blue-500 shadow-lg',
+          selectedOption && !isCorrect && 'bg-blue-100 border-blue-400 text-blue-800',
+          isCorrect === true && 'bg-green-100 border-green-400 text-green-800',
+          isCorrect === false && 'bg-red-100 border-red-400 text-red-800',
+          !selectedOption && 'bg-yellow-50 border-yellow-400 text-yellow-700 shadow-md animate-pulse'
         ].filter(Boolean).join(' ');
 
-        const blankElement = `<span class="${blankClasses}" data-blank-id="${blankId}">${selectedOption || '空欄'}</span>`;
-        codeWithBlanks = codeWithBlanks.replace(new RegExp(`\\[${blankId}\\]`, 'g'), blankElement);
+        // 全角隅付き括弧と全角スペースのパターンに対応（日本語カタカナ）
+        const blankKey = blankId.replace('blank_', '');
+        const katakanaMap: { [key: string]: string } = {
+          'a': 'ア', 'b': 'イ', 'c': 'ウ', 'd': 'エ', 'e': 'オ',
+          'f': 'カ', 'g': 'キ', 'h': 'ク', 'i': 'ケ', 'j': 'コ'
+        };
+        const katakana = katakanaMap[blankKey.toLowerCase()] || blankKey.toUpperCase();
+        const blankElement = `<span class="${blankClasses}" data-blank-id="${blankId}">${selectedOption || `【${katakana}】`}</span>`;
+        const blankPattern = new RegExp(`［　${katakana}　］`, 'g');
+        
+        // デバッグ用ログ
+        const beforeReplace = codeWithBlanks;
+        codeWithBlanks = codeWithBlanks.replace(blankPattern, blankElement);
+        const wasReplaced = beforeReplace !== codeWithBlanks;
+        
+        console.log(`Blank replacement for ${blankId}:`, {
+          blankKey,
+          katakana,
+          pattern: `［　${katakana}　］`,
+          wasReplaced,
+          blankElement: blankElement.substring(0, 100) + '...'
+        });
       });
 
       return (
@@ -125,24 +149,48 @@ export const BlankFillEditor: React.FC<BlankFillEditorProps> = ({
               
               const blankClasses = [
                 'inline-block',
-                'px-2',
-                'py-1',
+                'px-3',
+                'py-2',
                 'rounded',
-                'border',
+                'border-2',
                 'cursor-pointer',
                 'transition-all',
                 'duration-200',
-                'min-w-12',
+                'min-w-16',
                 'text-center',
-                isCurrentBlank && 'ring-2 ring-blue-500',
-                selectedOption && !isCorrect && 'bg-blue-100 border-blue-300',
-                isCorrect === true && 'bg-green-100 border-green-300 text-green-800',
-                isCorrect === false && 'bg-red-100 border-red-300 text-red-800',
-                !selectedOption && 'bg-gray-100 border-gray-300 text-gray-500'
+                'font-bold',
+                'hover:shadow-lg',
+                'hover:scale-105',
+                'relative',
+                isCurrentBlank && 'ring-2 ring-blue-500 shadow-lg',
+                selectedOption && !isCorrect && 'bg-blue-100 border-blue-400 text-blue-800',
+                isCorrect === true && 'bg-green-100 border-green-400 text-green-800',
+                isCorrect === false && 'bg-red-100 border-red-400 text-red-800',
+                !selectedOption && 'bg-yellow-50 border-yellow-400 text-yellow-700 shadow-md animate-pulse'
               ].filter(Boolean).join(' ');
 
-              const blankElement = `<span class="${blankClasses}" data-blank-id="${blankId}">${selectedOption || '空欄'}</span>`;
-              queryWithBlanks = queryWithBlanks.replace(new RegExp(`\\[${blankId}\\]`, 'g'), blankElement);
+              // 全角隅付き括弧と全角スペースのパターンに対応（日本語カタカナ）
+              const blankKey = blankId.replace('blank_', '');
+              const katakanaMap: { [key: string]: string } = {
+                'a': 'ア', 'b': 'イ', 'c': 'ウ', 'd': 'エ', 'e': 'オ',
+                'f': 'カ', 'g': 'キ', 'h': 'ク', 'i': 'ケ', 'j': 'コ'
+              };
+              const katakana = katakanaMap[blankKey.toLowerCase()] || blankKey.toUpperCase();
+              const blankElement = `<span class="${blankClasses}" data-blank-id="${blankId}">${selectedOption || `【${katakana}】`}</span>`;
+              const blankPattern = new RegExp(`［　${katakana}　］`, 'g');
+              
+              // デバッグ用ログ
+              const beforeReplace = queryWithBlanks;
+              queryWithBlanks = queryWithBlanks.replace(blankPattern, blankElement);
+              const wasReplaced = beforeReplace !== queryWithBlanks;
+              
+              console.log(`Query blank replacement for ${blankId}:`, {
+                blankKey,
+                katakana,
+                pattern: `［　${katakana}　］`,
+                wasReplaced,
+                blankElement: blankElement.substring(0, 100) + '...'
+              });
             });
 
             return (
@@ -166,8 +214,32 @@ export const BlankFillEditor: React.FC<BlankFillEditorProps> = ({
   const handleCodeClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
     const blankId = target.getAttribute('data-blank-id');
+    
+    // デバッグ用ログ
+    console.log('Code clicked:', {
+      target: target,
+      tagName: target.tagName,
+      className: target.className,
+      blankId: blankId,
+      innerHTML: target.innerHTML
+    });
+    
     if (blankId) {
+      console.log(`Setting current blank to: ${blankId}`);
       setCurrentBlank(blankId);
+    } else {
+      // blankIdが見つからない場合、親要素も確認
+      let parentElement = target.parentElement;
+      while (parentElement && !parentElement.getAttribute('data-blank-id')) {
+        parentElement = parentElement.parentElement;
+      }
+      if (parentElement) {
+        const parentBlankId = parentElement.getAttribute('data-blank-id');
+        if (parentBlankId) {
+          console.log(`Found blank ID in parent element: ${parentBlankId}`);
+          setCurrentBlank(parentBlankId);
+        }
+      }
     }
   };
 
@@ -296,9 +368,14 @@ export const BlankFillEditor: React.FC<BlankFillEditorProps> = ({
 
       {/* コードエディタ */}
       <div className="mb-6">
-        <h4 className="font-semibold mb-2">
-          {problem.category === 'algorithm' ? '擬似言語' : 'SQLクエリ'}
-        </h4>
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="font-semibold">
+            {problem.category === 'algorithm' ? '擬似言語' : 'SQLクエリ'}
+          </h4>
+          <div className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+            💡 黄色の空欄【ア】【イ】【ウ】をクリックして回答してください
+          </div>
+        </div>
         {renderCodeWithBlanks()}
       </div>
 

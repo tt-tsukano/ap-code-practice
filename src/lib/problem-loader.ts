@@ -254,10 +254,10 @@ export class ProblemLoader {
     const filePath = `/data/problems/${category}/${id}.json`;
 
     try {
-      // Next.js環境では動的インポートを使用
-      const problemData = await import(/* @vite-ignore */ `@${filePath}`);
+      // Vite環境では動的インポートを使用
+      const problemData = await import(/* @vite-ignore */ filePath);
       return problemData.default || problemData;
-    } catch {
+    } catch (importError) {
       // フォールバック: fetch APIを使用（静的ファイルとして配信されている場合）
       try {
         const response = await fetch(filePath);
